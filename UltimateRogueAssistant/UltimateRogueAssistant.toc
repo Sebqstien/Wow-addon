@@ -1,0 +1,34 @@
+## Interface: 16001
+## Title: Ultimate Rogue Assistant
+## Notes: Assistant de combat pour le voleur (WoW: Forever).
+## Version: 1.0.0
+## SavedVariables: URA_DB
+
+Core.lua
+Locales.lua
+Utils/Helpers.lua
+Utils/Events.lua
+Utils/API.lua
+Utils/Secrets.lua
+Config.lua
+Data/Spells.lua
+Data/Poisons.lua
+Data/Talents.lua
+Modules/Profiles.lua
+Modules/Energy.lua
+Modules/ComboPoints.lua
+Modules/Specialization.lua
+Modules/SpellAvailability.lua
+Modules/Cooldowns.lua
+Modules/PoisonManager.lua
+UI/Style.lua
+UI/Animations.lua
+UI/Movers.lua
+UI/MainFrame.lua
+UI/EnergyBar.lua
+UI/ComboPoints.lua
+UI/SpellIcons.lua
+UI/CooldownBars.lua
+UI/PoisonPanel.lua
+UI/ConfigFrame.lua
+Commands.lua

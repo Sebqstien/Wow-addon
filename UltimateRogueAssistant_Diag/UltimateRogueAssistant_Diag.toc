@@ -1,0 +1,7 @@
+## Interface: 16001
+## Title: Ultimate Rogue Assistant - Diagnostic
+## Notes: Verifie les capacites reelles du client WoW: Forever (aucune fonction de combat).
+## Version: 1.1.0
+## SavedVariables: URADiagDB
+
+Diag.lua
