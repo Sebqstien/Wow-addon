@@ -5,6 +5,9 @@ Il affiche l'énergie, les points de combo, les techniques et leurs recharges, e
 poisons des deux armes. C'est un assistant visuel : il ne lance aucun sort et n'applique
 aucun poison sans un clic du joueur.
 
+Le dépôt contient aussi **Ultimate Priest Assistant**, la version pour le prêtre, dans
+`UltimatePriestAssistant/` (voir son `README.md`). Elle n'a pas encore été testée en jeu.
+
 ## Installation
 
 1. Copier le dossier `UltimateRogueAssistant` dans `Interface/AddOns` du client Forever.

@@ -1,0 +1,33 @@
+## Interface: 16001
+## Title: Ultimate Priest Assistant
+## Notes: Assistant de combat pour le pretre (WoW: Forever).
+## Version: 1.0.0
+## SavedVariables: UPA_DB
+
+Core.lua
+Locales.lua
+Utils/Helpers.lua
+Utils/Events.lua
+Utils/API.lua
+Utils/Secrets.lua
+Config.lua
+Data/Spells.lua
+Data/Buffs.lua
+Data/Talents.lua
+Modules/Profiles.lua
+Modules/Mana.lua
+Modules/Specialization.lua
+Modules/SpellAvailability.lua
+Modules/Cooldowns.lua
+Modules/Buffs.lua
+UI/Style.lua
+UI/Animations.lua
+UI/Movers.lua
+UI/MainFrame.lua
+UI/ManaBar.lua
+UI/SpellIcons.lua
+UI/CooldownBars.lua
+UI/BuffPanel.lua
+UI/TargetDots.lua
+UI/ConfigFrame.lua
+Commands.lua
