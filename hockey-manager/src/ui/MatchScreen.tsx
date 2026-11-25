@@ -26,12 +26,13 @@ interface Props {
   home: Team;
   away: Team;
   seed: number;
+  tactic: Tactic;
   onFinish: (m: MatchState) => void;
 }
 
-export function MatchScreen({ home, away, seed, onFinish }: Props) {
+export function MatchScreen({ home, away, seed, tactic, onFinish }: Props) {
   const matchRef = useRef<MatchState>();
-  if (!matchRef.current) matchRef.current = createMatch(home, away, seed);
+  if (!matchRef.current) matchRef.current = createMatch(home, away, seed, { homeTactic: tactic });
   const m = matchRef.current;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);

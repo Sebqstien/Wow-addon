@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
+import { LineupScreen } from './LineupScreen';
 import { createRng } from '../engine/rng';
-import { CLUBS, generateTeam, overall, type Team } from '../engine/team';
-import type { MatchState } from '../engine/match';
+import { CLUBS, generateTeam, lineChemistry, overall, type Team } from '../engine/team';
+import type { MatchState, Tactic } from '../engine/match';
 import { MatchScreen } from './MatchScreen';
 
-type Screen = 'pre' | 'match' | 'post';
+type Screen = 'pre' | 'lineup' | 'match' | 'post';
 
 function teamRating(team: Team): number {
   const all = team.lines.flatMap((line) => line.map((p, slot) => overall(p, slot)));
@@ -26,11 +27,17 @@ export function App() {
   const [screen, setScreen] = useState<Screen>('pre');
   const [result, setResult] = useState<MatchState | null>(null);
 
-  const [home, away] = useMemo(() => {
-    const rng = createRng(seed);
+  // Votre club est créé une fois et garde sa composition d'un match à l'autre.
+  const [home, setHome] = useState(() => generateTeam(createRng(seed ^ 0x5eed), CLUBS[0], 68, 0));
+  const [tactic, setTactic] = useState<Tactic>('equilibre');
+  const away = useMemo(() => {
     const opponent = CLUBS[1 + (seed % (CLUBS.length - 1))];
-    return [generateTeam(rng, CLUBS[0], 68, 0), generateTeam(rng, opponent, 68, 100)];
+    return generateTeam(createRng(seed), opponent, 68, 100);
   }, [seed]);
+
+  if (screen === 'lineup') {
+    return <LineupScreen team={home} tactic={tactic} onChange={setHome} onTactic={setTactic} onBack={() => setScreen('pre')} />;
+  }
 
   if (screen === 'match') {
     return (
@@ -39,6 +46,7 @@ export function App() {
         home={home}
         away={away}
         seed={seed}
+        tactic={tactic}
         onFinish={(m) => {
           setResult(m);
           setScreen('post');
@@ -103,17 +111,20 @@ export function App() {
         </div>
       </section>
       <section className="card list">
-        <div className="eyebrow">VOTRE LIGNE 1</div>
-        {home.lines[0].map((p, slot) => (
-          <div className="row" key={p.id}>
-            <span className="rating">{overall(p, slot)}</span>
+        <div className="eyebrow">VOS LIGNES</div>
+        {home.lines.map((line, i) => (
+          <div className="row" key={i}>
+            <span className="rating">{Math.round(line.reduce((sum, p, slot) => sum + overall(p, slot), 0) / line.length)}</span>
             <span className="row-text">
-              {p.firstName} {p.lastName}
+              Ligne {i + 1} · {line[1].lastName}
             </span>
-            <span className="muted small">{p.trait}</span>
+            <span className="muted small">Entente {Math.round(lineChemistry(line).value * 100)} %</span>
           </div>
         ))}
       </section>
+      <button className="btn-outline" onClick={() => setScreen('lineup')}>
+        LIGNES ET TACTIQUE
+      </button>
       <p className="muted small help">
         Pendant le match : changez de ligne quand l'énergie baisse, ajustez la tactique et déclenchez le boost quand la
         jauge est pleine.

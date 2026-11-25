@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createRng } from './rng';
 import { simulateMatch } from './match';
-import { CLUBS, generateTeam } from './team';
+import { CLUBS, autoLineup, generateTeam, lineChemistry, overall, swapPlayers } from './team';
 
 function teams(seed: number) {
   const rng = createRng(seed);
@@ -38,5 +38,35 @@ describe('moteur de match', () => {
     expect(goals / N).toBeLessThan(8.5);
     expect(shots / N).toBeGreaterThan(25);
     expect(shots / N).toBeLessThan(75);
+  });
+
+  it('échange deux joueurs sans modifier l\'équipe d\'origine', () => {
+    const [home] = teams(3);
+    const a = home.lines[0][1];
+    const b = home.bench[0];
+    const next = swapPlayers(home, { zone: 'line', line: 0, slot: 1 }, { zone: 'bench', index: 0 });
+    expect(next.lines[0][1]).toBe(b);
+    expect(next.bench[0]).toBe(a);
+    expect(home.lines[0][1]).toBe(a);
+    // Un gardien ne s'échange pas avec un patineur.
+    expect(swapPlayers(home, { zone: 'goalie' }, { zone: 'bench', index: 0 })).toBe(home);
+  });
+
+  it('pénalise un joueur hors de son poste', () => {
+    const [home] = teams(4);
+    const forward = home.lines[0][0];
+    expect(overall(forward, 3)).toBeLessThan(overall(forward, 0) + 20);
+    const mixed = swapPlayers(home, { zone: 'line', line: 0, slot: 0 }, { zone: 'line', line: 0, slot: 3 });
+    expect(lineChemistry(mixed.lines[0]).value).toBeLessThan(lineChemistry(home.lines[0]).value);
+  });
+
+  it('la composition automatique garde 15 patineurs à leur poste et la ligne 1 la plus forte', () => {
+    const [home] = teams(5);
+    const auto = autoLineup(home);
+    const ids = [...auto.lines.flat(), ...auto.bench].map((p) => p.id);
+    expect(new Set(ids).size).toBe(19);
+    auto.lines.forEach((line) => line.forEach((p, slot) => expect(p.role).toBe(slot <= 2 ? 'F' : 'D')));
+    const level = (line: typeof auto.lines[0]) => line.reduce((sum, p, slot) => sum + overall(p, slot), 0);
+    expect(level(auto.lines[0])).toBeGreaterThanOrEqual(level(auto.lines[2]));
   });
 });

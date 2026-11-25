@@ -1,5 +1,5 @@
 import { createRng, type Rng } from './rng';
-import { playerLabel, type Player, type Team } from './team';
+import { OUT_OF_POSITION, lineChemistry, playerLabel, slotRole, type Player, type Team } from './team';
 
 /**
  * Moteur de match. Aucune dépendance à l'affichage : `step` fait avancer la
@@ -70,6 +70,8 @@ export interface TeamState {
   lineTime: number;
   energy: number[];
   tactic: Tactic;
+  /** Entente de chaque ligne, de 0 à 1. */
+  chemistry: number[];
   /** Jauge de boost, de 0 à 1. */
   boost: number;
   /** Secondes de boost restantes. */
@@ -131,7 +133,12 @@ const inNet = (m: MatchState, s: Skater) => s.slot === 5 && !m.teams[s.team].goa
 const goalieOf = (m: MatchState, t: TeamIndex) => m.skaters.find((s) => s.team === t && s.slot === 5)!;
 
 type SkillKey = 'skating' | 'shooting' | 'passing' | 'physical' | 'defense' | 'mental';
-const skill = (m: MatchState, s: Skater, key: SkillKey) => s.player[key] * energyFactor(m.teams[s.team]);
+/** Niveau effectif : fatigue, entente de la ligne et poste naturel. */
+function skill(m: MatchState, s: Skater, key: SkillKey): number {
+  const ts = m.teams[s.team];
+  const misplaced = s.slot < 5 && s.player.role !== slotRole(s.slot) ? OUT_OF_POSITION : 1;
+  return s.player[key] * energyFactor(ts) * (0.94 + 0.12 * ts.chemistry[ts.line]) * misplaced;
+}
 
 function pushEvent(m: MatchState, team: TeamIndex | null, kind: MatchEvent['kind'], text: string) {
   m.events.push({ period: m.period, clock: Math.max(0, m.clock), team, kind, text });
@@ -140,6 +147,8 @@ function pushEvent(m: MatchState, team: TeamIndex | null, kind: MatchEvent['kind
 export interface MatchOptions {
   /** L'équipe à domicile est-elle pilotée par l'ordinateur ? */
   cpuHome?: boolean;
+  /** Tactique de départ de l'équipe à domicile. */
+  homeTactic?: Tactic;
 }
 
 export function createMatch(home: Team, away: Team, seed: number, options: MatchOptions = {}): MatchState {
@@ -150,6 +159,7 @@ export function createMatch(home: Team, away: Team, seed: number, options: Match
     lineTime: 0,
     energy: [1, 1, 1],
     tactic: 'equilibre',
+    chemistry: team.lines.map((line) => lineChemistry(line).value),
     boost: 0,
     boostActive: 0,
     timeoutsLeft: 1,
@@ -196,6 +206,7 @@ export function createMatch(home: Team, away: Team, seed: number, options: Match
     winner: null,
     decidedBy: 'temps',
   };
+  if (options.homeTactic) m.teams[0].tactic = options.homeTactic;
   setupFaceoff(m, CX, L / 2, 1.6);
   for (const s of m.skaters) {
     const p = faceoffPosition(m, s);
